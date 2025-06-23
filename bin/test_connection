@@ -1,0 +1,118 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "bundler/setup"
+require_relative "../lib/things_mcp"
+
+puts "Testing Things MCP Ruby Server"
+puts "=" * 40
+
+# Test 1: Things app availability
+puts "\n1. Testing Things app availability..."
+begin
+  if ThingsMcp::Database.things_app_available?
+    puts "✅ Things app is running"
+  else
+    puts "❌ Things app is not running"
+    puts "  Please start Things 3 and try again"
+    @test_failed = true
+  end
+rescue => e
+  puts "❌ Error checking Things app: #{e.message}"
+  @test_failed = true
+end
+
+# Test 2: Database access
+puts "\n2. Testing database access..."
+begin
+  todos = ThingsMcp::Database.get_inbox
+  puts "✅ Database accessible"
+  puts "  Found #{todos.size} todos in Inbox"
+rescue => e
+  puts "❌ Database error: #{e.message}"
+  puts "  #{e.backtrace.first}"
+  @test_failed = true
+end
+
+# Test 3: Handler functionality
+puts "\n3. Testing handler functionality..."
+begin
+  result = ThingsMcp::Handlers.handle_tool_call("get-inbox", {})
+  puts "✅ Handler working"
+  puts "  Result preview: #{result[0..100]}..."
+rescue => e
+  puts "❌ Handler error: #{e.message}"
+  puts "  #{e.backtrace.first}"
+  @test_failed = true
+end
+
+# Test 4: URL Scheme - Create todo
+puts "\n4. Testing URL scheme (create todo)..."
+test_todo_title = "Test MCP server #{Time.now.strftime("%H:%M:%S")}"
+begin
+  result = ThingsMcp::UrlScheme.add_todo({
+    "title" => test_todo_title,
+    "notes" => "This is a test todo created by the MCP server test script",
+  })
+
+  if result[:success]
+    puts "✅ URL scheme working - test todo created"
+    puts "  Todo: '#{test_todo_title}'"
+
+    # Test update operations if auth token is available
+    if ENV["THINGS_AUTH_TOKEN"]
+      puts "\n5. Testing URL scheme (update/cleanup)..."
+      puts "  Using auth token for update operation..."
+
+      # Brief retry to find the created todo (database sync is not immediate)
+      puts "  Searching for created todo in database..."
+      test_todo = nil
+      3.times do |i|
+        inbox_todos = ThingsMcp::Database.get_inbox
+        test_todo = inbox_todos.find { |t| t[:title] == test_todo_title }
+        break if test_todo
+        sleep(1) if i < 2  # Don't sleep after the last attempt
+      end
+
+      if test_todo
+        puts "✅ Todo found in database"
+        complete_result = ThingsMcp::UrlScheme.update_todo({
+          "id" => test_todo[:uuid],
+          "completed" => true,
+        })
+
+        if complete_result[:success]
+          puts "✅ Update operations working - test todo completed and cleaned up"
+        else
+          puts "❌ Could not complete test todo: #{complete_result[:error]}"
+          puts "  You may need to manually complete: '#{test_todo_title}'"
+          @test_failed = true
+        end
+      else
+        puts "❌ Could not find test todo in database after 3 attempts"
+        puts "  Database sync delay longer than expected - please manually complete: '#{test_todo_title}'"
+        @test_failed = true
+      end
+    end
+  else
+    puts "❌ URL scheme failed: #{result[:error]}"
+    @test_failed = true
+  end
+rescue => e
+  puts "❌ URL scheme error: #{e.message}"
+  puts "  #{e.backtrace.first}"
+  @test_failed = true
+end
+
+puts "\n" + "=" * 40
+puts "Test completed!"
+
+if ENV["THINGS_AUTH_TOKEN"]
+  puts "✅ Full testing (with auth token)"
+else
+  puts "⚠️  Partial testing (no auth token for updates)"
+  puts "   Set THINGS_AUTH_TOKEN=your_token to test update operations"
+end
+
+# Exit with error if there were any failures
+exit 1 if defined?(@test_failed)

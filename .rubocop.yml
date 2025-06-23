@@ -1,0 +1,12 @@
+inherit_gem:
+  rubocop-shopify: rubocop.yml
+
+AllCops:
+  TargetRubyVersion: 3.2
+  NewCops: enable
+  Exclude:
+    - 'vendor/**/*'
+
+# Allow get_ prefixed methods for database accessors that match Things 3 semantics
+Naming/AccessorMethodName:
+  Enabled: false
