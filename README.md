@@ -101,10 +101,7 @@ Add to your Claude Desktop configuration file:
 {
   "mcpServers": {
     "things": {
-      "command": "things_mcp_server",
-      "env": {
-        "THINGSDB": "/Users/YOUR_USERNAME/Library/Group Containers/JLMPQHK86H.com.culturedcode.ThingsMac/Things Database.thingsdatabase/main.sqlite"
-      }
+      "command": "things_mcp_server"
     }
   }
 }
@@ -118,10 +115,7 @@ Add to your Claude Desktop configuration file:
     "things": {
       "command": "ruby",
       "args": ["bin/things_mcp_server"],
-      "cwd": "/path/to/things-mcp-ruby",
-      "env": {
-        "THINGSDB": "/Users/YOUR_USERNAME/Library/Group Containers/JLMPQHK86H.com.culturedcode.ThingsMac/Things Database.thingsdatabase/main.sqlite"
-      }
+      "cwd": "/path/to/things-mcp-ruby"
     }
   }
 }
@@ -149,7 +143,6 @@ For `update-todo` and `update-project` operations, you need to provide a Things 
     "things": {
       "command": "things_mcp_server",
       "env": {
-        "THINGSDB": "/Users/YOUR_USERNAME/Library/Group Containers/JLMPQHK86H.com.culturedcode.ThingsMac/Things Database.thingsdatabase/main.sqlite",
         "THINGS_AUTH_TOKEN": "your_authorization_token_here"
       }
     }
@@ -167,7 +160,6 @@ For `update-todo` and `update-project` operations, you need to provide a Things 
       "args": ["bin/things_mcp_server"],
       "cwd": "/path/to/things-mcp-ruby",
       "env": {
-        "THINGSDB": "/Users/YOUR_USERNAME/Library/Group Containers/JLMPQHK86H.com.culturedcode.ThingsMac/Things Database.thingsdatabase/main.sqlite",
         "THINGS_AUTH_TOKEN": "your_authorization_token_here"
       }
     }

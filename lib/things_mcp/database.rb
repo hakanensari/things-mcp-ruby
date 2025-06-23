@@ -12,29 +12,6 @@ module ThingsMcp
   # tags. It handles dynamic database path resolution and provides formatted data structures.
   class Database
     class << self
-      def find_database_path
-        group_containers_dir = "#{Dir.home}/Library/Group Containers"
-
-        # Find Things-specific directories to avoid permission issues
-        things_dirs = Dir.glob("#{group_containers_dir}/*").select do |dir|
-          File.basename(dir).include?("culturedcode.ThingsMac")
-        end
-
-        things_dirs.each do |things_dir|
-          # Try new format first (Things 3.15.16+)
-          new_pattern = "#{things_dir}/ThingsData-*/Things Database.thingsdatabase/main.sqlite"
-          matches = Dir.glob(new_pattern)
-          return matches.first unless matches.empty?
-
-          # Fall back to old format
-          old_pattern = "#{things_dir}/Things Database.thingsdatabase/main.sqlite"
-          return old_pattern if File.exist?(old_pattern)
-        end
-
-        # Check environment variable
-        ENV["THINGSDB"] if ENV["THINGSDB"] && File.exist?(ENV["THINGSDB"])
-      end
-
       def database_path
         @database_path ||= find_database_path
       end
@@ -46,15 +23,6 @@ module ThingsMcp
       def with_database(&block)
         db_path = database_path
         unless db_path
-          $stderr.puts "DEBUG: Database path search failed"
-          $stderr.puts "DEBUG: Home directory: #{Dir.home}"
-          $stderr.puts "DEBUG: Group Containers exists: #{File.exist?("#{Dir.home}/Library/Group Containers")}"
-          if File.exist?("#{Dir.home}/Library/Group Containers")
-            containers = Dir.glob("#{Dir.home}/Library/Group Containers/*")
-            $stderr.puts "DEBUG: Found containers: #{containers.size}"
-            things_containers = containers.select { |c| File.basename(c).include?("culturedcode") }
-            $stderr.puts "DEBUG: Things containers: #{things_containers}"
-          end
           raise "Things database not found. Please ensure Things 3 is installed and has been launched at least once."
         end
 
@@ -334,9 +302,24 @@ module ThingsMcp
 
       private
 
+      def find_database_path
+        group_containers_dir = "#{Dir.home}/Library/Group Containers"
+
+        # Find Things-specific directories to avoid permission issues
+        things_dirs = Dir.glob("#{group_containers_dir}/*").select do |dir|
+          File.basename(dir).include?("culturedcode.ThingsMac")
+        end
+
+        things_dirs.each do |things_dir|
+          pattern = "#{things_dir}/*/*/main.sqlite"
+          matches = Dir.glob(pattern)
+
+          return matches.first unless matches.empty?
+        end
+      end
+
       def todo_columns
-        "uuid, title, notes, status, project, area, start, startDate, " \
-          "deadline, creationDate, userModificationDate"
+        "uuid, title, notes, status, project, area, start, startDate, deadline, creationDate, userModificationDate"
       end
 
       def build_todo_query(project_uuid: nil)
