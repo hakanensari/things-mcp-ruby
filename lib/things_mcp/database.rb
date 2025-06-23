@@ -11,11 +11,10 @@ module ThingsMcp
   # This class provides read-only access to the Things 3 database, enabling retrieval of todos, projects, areas, and
   # tags. It handles dynamic database path resolution and provides formatted data structures.
   class Database
-
     class << self
       def find_database_path
         group_containers_dir = "#{Dir.home}/Library/Group Containers"
-        
+
         # Find Things-specific directories to avoid permission issues
         things_dirs = Dir.glob("#{group_containers_dir}/*").select do |dir|
           File.basename(dir).include?("culturedcode.ThingsMac")

@@ -112,9 +112,8 @@ module ThingsMcp
       # Build query string and convert + to %20 for spaces
       query_string = URI.encode_www_form(params)
       query_string = query_string.gsub("+", "%20") unless query_string.empty?
-      
-      full_url = query_string.empty? ? base_url : "#{base_url}?#{query_string}"
 
+      full_url = query_string.empty? ? base_url : "#{base_url}?#{query_string}"
 
       # Ensure Things is running
       unless things_running?
@@ -151,6 +150,5 @@ module ThingsMcp
 
       auth_required_operations.any? { |op| url.start_with?(op) }
     end
-
   end
 end

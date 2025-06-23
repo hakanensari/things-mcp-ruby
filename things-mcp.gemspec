@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
   spec.executables = ["things_mcp_server"]
   spec.require_paths = ["lib"]
 
+  spec.add_dependency("logger", "~> 1.4")
   spec.add_dependency("mcp", "~> 0.1")
   spec.add_dependency("sqlite3", "~> 2.0")
-  spec.add_dependency("logger", "~> 1.4")
 end

@@ -71,7 +71,8 @@ begin
         inbox_todos = ThingsMcp::Database.get_inbox
         test_todo = inbox_todos.find { |t| t[:title] == test_todo_title }
         break if test_todo
-        sleep(1) if i < 2  # Don't sleep after the last attempt
+
+        sleep(1) if i < 2 # Don't sleep after the last attempt
       end
 
       if test_todo
@@ -81,6 +82,7 @@ begin
           "completed" => true,
         })
 
+        # rubocop:disable Metrics/BlockNesting
         if complete_result[:success]
           puts "✅ Update operations working - test todo completed and cleaned up"
         else
@@ -88,6 +90,7 @@ begin
           puts "  You may need to manually complete: '#{test_todo_title}'"
           @test_failed = true
         end
+        # rubocop:enable Metrics/BlockNesting
       else
         puts "❌ Could not find test todo in database after 3 attempts"
         puts "  Database sync delay longer than expected - please manually complete: '#{test_todo_title}'"

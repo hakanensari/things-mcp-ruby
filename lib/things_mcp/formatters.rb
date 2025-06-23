@@ -147,6 +147,5 @@ module ThingsMcp
 
       lines.join("\n")
     end
-
   end
 end

@@ -27,7 +27,7 @@ module ThingsMcp
       @server = MCP::Server.new(
         name: "things",
         version: "0.1.0",
-        tools: @tool_classes
+        tools: @tool_classes,
       )
     rescue => e
       $stderr.puts "ERROR during initialization: #{e.class}: #{e.message}"
@@ -62,12 +62,12 @@ module ThingsMcp
     def check_ruby_version
       required_version = Gem::Version.new("3.2.0")
       current_version = Gem::Version.new(RUBY_VERSION)
-      
+
       return if current_version >= required_version
 
       $stderr.puts "❌ Ruby #{RUBY_VERSION} is too old! This server requires Ruby 3.2+"
       $stderr.flush
-      exit 1
+      exit(1)
     end
 
     def create_tool_classes
@@ -95,7 +95,7 @@ module ThingsMcp
           required: tool_def[:inputSchema][:required],
         )
 
-        define_singleton_method(:call) do |server_context:, **arguments|
+        define_singleton_method(:call) do |_server_context:, **arguments|
           # Convert symbol keys to string keys for consistent access
           string_arguments = arguments.transform_keys(&:to_s)
           result = ThingsMcp::Handlers.handle_tool_call(name, string_arguments)

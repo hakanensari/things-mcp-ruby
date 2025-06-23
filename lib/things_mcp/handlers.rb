@@ -206,8 +206,8 @@ module ThingsMcp
 
     def handle_update_todo(args)
       unless ENV["THINGS_AUTH_TOKEN"]
-        return "❌ Update operations require authentication. Please set THINGS_AUTH_TOKEN environment variable. " +
-               "See README for setup instructions."
+        return "❌ Update operations require authentication. Please set THINGS_AUTH_TOKEN environment variable. " \
+          "See README for setup instructions."
       end
 
       result = UrlScheme.update_todo(args)
@@ -221,8 +221,8 @@ module ThingsMcp
 
     def handle_update_project(args)
       unless ENV["THINGS_AUTH_TOKEN"]
-        return "❌ Update operations require authentication. Please set THINGS_AUTH_TOKEN environment variable. " +
-               "See README for setup instructions."
+        return "❌ Update operations require authentication. Please set THINGS_AUTH_TOKEN environment variable. " \
+          "See README for setup instructions."
       end
 
       result = UrlScheme.update_project(args)
