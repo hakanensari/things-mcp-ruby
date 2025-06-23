@@ -6,6 +6,7 @@ gemspec
 
 # Development dependencies
 group :development do
+  gem "debug"
   gem "rake"
   gem "rubocop-shopify", require: false
 end
