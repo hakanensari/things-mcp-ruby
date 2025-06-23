@@ -47,22 +47,6 @@ bundle install
 
 ## Testing the Installation
 
-### If Using the Gem
-
-1. **Basic test** (database + create operations):
-
-```bash
-test_connection
-```
-
-2. **Full test** (including update operations):
-
-```bash
-THINGS_AUTH_TOKEN=your_token_here test_connection
-```
-
-### If Using from Source
-
 1. **Basic test** (database + create operations):
 
 ```bash

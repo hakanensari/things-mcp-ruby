@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
 
   spec.files = Dir.glob("{bin,lib}/**/*") + ["README.md", "LICENSE", "Gemfile", "Rakefile"]
   spec.bindir = "bin"
-  spec.executables = ["things_mcp_server", "test_connection"]
+  spec.executables = ["things_mcp_server"]
   spec.require_paths = ["lib"]
 
   spec.add_dependency("mcp", "~> 0.1")
