@@ -29,6 +29,18 @@ A Model Context Protocol (MCP) server for Things 3, implemented in Ruby.
 
 ## Installation
 
+### Option 1: Using the Released Gem (Recommended)
+
+1. Install the gem:
+
+```bash
+gem install things-mcp
+```
+
+2. The MCP server will be available as `things_mcp_server` in your PATH.
+
+### Option 2: From Source
+
 1. Clone this repository:
 
 ```bash
@@ -44,6 +56,22 @@ bundle install
 
 ## Testing the Installation
 
+### If Using the Gem
+
+1. **Basic test** (database + create operations):
+
+```bash
+test_connection
+```
+
+2. **Full test** (including update operations):
+
+```bash
+THINGS_AUTH_TOKEN=your_token_here test_connection
+```
+
+### If Using from Source
+
 1. **Basic test** (database + create operations):
 
 ```bash
@@ -56,12 +84,6 @@ bin/test_connection
 THINGS_AUTH_TOKEN=your_token_here bin/test_connection
 ```
 
-3. **Via Rake:**
-
-```bash
-bundle exec rake test
-```
-
 The test script will:
 
 - ✓ Check if Things app is running
@@ -71,7 +93,15 @@ The test script will:
 - ✓ Verify the todo in the database
 - ✓ Test update operations by completing the test todo (if auth token provided)
 
-2. Run the MCP server:
+## Running the MCP Server
+
+### If Using the Gem
+
+```bash
+things_mcp_server
+```
+
+### If Using from Source
 
 ```bash
 bundle exec ruby bin/things_mcp_server
@@ -90,13 +120,33 @@ Add to your Claude Desktop configuration file:
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 
+#### Using the Released Gem (Recommended)
+
+```json
+{
+  "mcpServers": {
+    "things": {
+      "command": "things_mcp_server",
+      "env": {
+        "THINGSDB": "/Users/YOUR_USERNAME/Library/Group Containers/JLMPQHK86H.com.culturedcode.ThingsMac/Things Database.thingsdatabase/main.sqlite"
+      }
+    }
+  }
+}
+```
+
+#### Using from Source
+
 ```json
 {
   "mcpServers": {
     "things": {
       "command": "ruby",
       "args": ["bin/things_mcp_server"],
-      "cwd": "/path/to/things-mcp-ruby"
+      "cwd": "/path/to/things-mcp-ruby",
+      "env": {
+        "THINGSDB": "/Users/YOUR_USERNAME/Library/Group Containers/JLMPQHK86H.com.culturedcode.ThingsMac/Things Database.thingsdatabase/main.sqlite"
+      }
     }
   }
 }
@@ -116,6 +166,24 @@ For `update-todo` and `update-project` operations, you need to provide a Things 
 
 2. **Add the token to your configuration:**
 
+#### Using the Released Gem
+
+```json
+{
+  "mcpServers": {
+    "things": {
+      "command": "things_mcp_server",
+      "env": {
+        "THINGSDB": "/Users/YOUR_USERNAME/Library/Group Containers/JLMPQHK86H.com.culturedcode.ThingsMac/Things Database.thingsdatabase/main.sqlite",
+        "THINGS_AUTH_TOKEN": "your_authorization_token_here"
+      }
+    }
+  }
+}
+```
+
+#### Using from Source
+
 ```json
 {
   "mcpServers": {
@@ -124,12 +192,15 @@ For `update-todo` and `update-project` operations, you need to provide a Things 
       "args": ["bin/things_mcp_server"],
       "cwd": "/path/to/things-mcp-ruby",
       "env": {
+        "THINGSDB": "/Users/YOUR_USERNAME/Library/Group Containers/JLMPQHK86H.com.culturedcode.ThingsMac/Things Database.thingsdatabase/main.sqlite",
         "THINGS_AUTH_TOKEN": "your_authorization_token_here"
       }
     }
   }
 }
 ```
+
+**Note:** Replace `YOUR_USERNAME` with your actual macOS username. If you have trouble finding the exact database path, you can run `find ~/Library/Group\ Containers -name "main.sqlite" 2>/dev/null | grep Things` to locate it.
 
 ⚠️ **Security Note:** Keep your authorization token private. It allows full access to modify your Things data.
 
@@ -193,15 +264,17 @@ Once configured, you can use your MCP-compatible AI client to:
 - `add-project` - Create a new project in Things
 - `update-todo` - Update an existing todo ⚠️ _Requires auth token_
 - `update-project` - Update an existing project ⚠️ _Requires auth token_
+
+> **Note:** When adding tags to existing todos/projects, the tags must already exist in Things. The URL scheme will not create new tags automatically.
 - `show-item` - Show a specific item or list in Things
 - `search-items` - Search for items and open in Things
 
 ## Development
 
-Run tests:
+Run connection tests:
 
 ```bash
-bundle exec rake test
+bin/test_connection
 ```
 
 Run linter:
@@ -210,7 +283,7 @@ Run linter:
 bundle exec rake rubocop
 ```
 
-Run both tests and linter:
+Run all development tasks:
 
 ```bash
 bundle exec rake
