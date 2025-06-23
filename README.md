@@ -259,12 +259,6 @@ Run linter:
 bundle exec rake rubocop
 ```
 
-Run all development tasks:
-
-```bash
-bundle exec rake
-```
-
 ## License
 
 MIT
