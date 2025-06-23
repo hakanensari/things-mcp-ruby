@@ -1,6 +1,6 @@
 # Things 3 MCP Server (Ruby)
 
-A Model Context Protocol (MCP) server for Things 3, implemented in Ruby.
+A (clunky) Model Context Protocol (MCP) server for Things 3, implemented in Ruby.
 
 ## Features
 
@@ -17,10 +17,11 @@ A Model Context Protocol (MCP) server for Things 3, implemented in Ruby.
 3. **No authentication required** - the server reads from Things' local database
 
 > **Note for macOS users**: The system Ruby (typically 2.6.x) is too old. Install a modern Ruby version:
+>
 > ```bash
 > # Using Homebrew (recommended)
 > brew install ruby
-> 
+>
 > # Or using rbenv
 > brew install rbenv
 > rbenv install 3.4.1
@@ -266,6 +267,7 @@ Once configured, you can use your MCP-compatible AI client to:
 - `update-project` - Update an existing project ⚠️ _Requires auth token_
 
 > **Note:** When adding tags to existing todos/projects, the tags must already exist in Things. The URL scheme will not create new tags automatically.
+
 - `show-item` - Show a specific item or list in Things
 - `search-items` - Search for items and open in Things
 
