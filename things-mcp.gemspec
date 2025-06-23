@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
+$LOAD_PATH.unshift(File.expand_path("lib", __dir__))
+require "things_mcp/version"
+
 Gem::Specification.new do |spec|
   spec.name = "things-mcp"
-  spec.version = "0.1.0"
+  spec.version = ThingsMcp::VERSION
   spec.authors = ["Hakan Ensari"]
   spec.email = ["hakanensari@gmail.com"]
 

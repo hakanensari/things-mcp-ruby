@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    things-mcp (0.1.0)
+    things-mcp (0.1.1)
       logger (~> 1.4)
       mcp (~> 0.1)
       sqlite3 (~> 2.0)
