@@ -16,17 +16,7 @@ A (clunky) Model Context Protocol (MCP) server for Things 3, implemented in Ruby
 2. **Ruby 3.2+** installed (required by the MCP gem dependency)
 3. **No authentication required** - the server reads from Things' local database
 
-> **Note for macOS users**: The system Ruby (typically 2.6.x) is too old. Install a modern Ruby version:
->
-> ```bash
-> # Using Homebrew (recommended)
-> brew install ruby
->
-> # Or using rbenv
-> brew install rbenv
-> rbenv install 3.4.1
-> rbenv global 3.4.1
-> ```
+**Note for macOS users**: The system Ruby is possibly too old. Install a modern Ruby.
 
 ## Installation
 
