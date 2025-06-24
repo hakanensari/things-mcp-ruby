@@ -476,7 +476,7 @@ module ThingsMcp
           project: row["project"],
           area: row["area"],
           tags: [],  # Tags will be populated separately
-          when: format_when(row["start"]),
+          start: row["start"],
           start_date: things_date_to_date(row["startDate"]),
           deadline: things_date_to_date(row["deadline"]),
           created: unix_timestamp_to_date(row["creationDate"]),
@@ -492,7 +492,7 @@ module ThingsMcp
           status: format_status(row["status"]),
           area: row["area"],
           tags: [],  # Tags will be populated separately for projects too
-          when: format_when(row["start"]),
+          start: row["start"],
           start_date: things_date_to_date(row["startDate"]),
           deadline: things_date_to_date(row["deadline"]),
           created: unix_timestamp_to_date(row["creationDate"]),
@@ -520,16 +520,6 @@ module ThingsMcp
         when 0 then "incomplete"
         when 2 then "canceled"
         when 3 then "completed"
-        else "unknown"
-        end
-      end
-
-      def format_when(start)
-        case start
-        when 0 then "inbox"
-        when 1 then "today"
-        when 2 then "anytime"
-        when 3 then "someday"
         else "unknown"
         end
       end
