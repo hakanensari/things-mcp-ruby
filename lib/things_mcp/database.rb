@@ -82,14 +82,7 @@ module ThingsMcp
           SQL
 
           results = db.execute(query).map { |row| format_todo(row) }
-
-          # Add checklist items and tags
-          results.each do |todo|
-            todo[:checklist_items] = get_checklist_items(db, todo[:uuid])
-            todo[:tags] = get_tags_for_task(db, todo[:uuid])
-          end
-
-          results
+          add_checklist_items_and_tags(db, results)
         end
       end
 
@@ -106,12 +99,26 @@ module ThingsMcp
             ORDER BY COALESCE(startDate, deadline)
           SQL
 
-          db.execute(query).map { |row| format_todo(row) }
+          results = db.execute(query).map { |row| format_todo(row) }
+          add_checklist_items_and_tags(db, results)
         end
       end
 
       def get_anytime
-        get_todos_by_start(1)
+        with_database do |db|
+          query = <<~SQL
+            SELECT #{todo_columns}
+            FROM TMTask
+            WHERE type = 0
+              AND status = 0
+              AND trashed = 0
+              AND start = 1
+            ORDER BY "index"
+          SQL
+
+          results = db.execute(query).map { |row| format_todo(row) }
+          add_checklist_items_and_tags(db, results)
+        end
       end
 
       def get_someday
@@ -133,14 +140,7 @@ module ThingsMcp
           SQL
 
           results = db.execute(query).map { |row| format_todo(row) }
-
-          # Add checklist items and tags
-          results.each do |todo|
-            todo[:checklist_items] = get_checklist_items(db, todo[:uuid])
-            todo[:tags] = get_tags_for_task(db, todo[:uuid])
-          end
-
-          results
+          add_checklist_items_and_tags(db, results)
         end
       end
 
@@ -573,6 +573,15 @@ module ThingsMcp
       rescue
         # If decoding fails, return original title
         title
+      end
+
+      # Helper method to consistently add checklist items and tags to todos
+      def add_checklist_items_and_tags(db, todos)
+        todos.each do |todo|
+          todo[:checklist_items] = get_checklist_items(db, todo[:uuid])
+          todo[:tags] = get_tags_for_task(db, todo[:uuid])
+        end
+        todos
       end
     end
   end
