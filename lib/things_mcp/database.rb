@@ -111,28 +111,7 @@ module ThingsMcp
       end
 
       def get_anytime
-        # Get todos without specific start dates (the real "anytime" list)
-        with_database do |db|
-          query = <<~SQL
-            SELECT #{todo_columns}
-            FROM TMTask
-            WHERE type = 0
-              AND status = 0
-              AND trashed = 0
-              AND startDate IS NULL
-            ORDER BY "index"
-          SQL
-
-          results = db.execute(query).map { |row| format_todo(row) }
-
-          # Add checklist items and tags
-          results.each do |todo|
-            todo[:checklist_items] = get_checklist_items(db, todo[:uuid])
-            todo[:tags] = get_tags_for_task(db, todo[:uuid])
-          end
-
-          results
-        end
+        get_todos_by_start(1)
       end
 
       def get_someday
