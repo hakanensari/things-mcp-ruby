@@ -115,7 +115,33 @@ module ThingsMcp
       end
 
       def get_someday
-        get_todos_by_start(3)
+        # Get todos in someday: start=2 with no dates
+        # FIXME: Recurring items (like "Update mileage log") appear here when they should
+        # appear in Today or Scheduled based on their next occurrence. Things likely uses
+        # additional metadata to track recurring patterns that we haven't implemented.
+        with_database do |db|
+          query = <<~SQL
+            SELECT #{todo_columns}
+            FROM TMTask
+            WHERE type = 0
+              AND status = 0
+              AND trashed = 0
+              AND start = 2
+              AND startDate IS NULL
+              AND deadline IS NULL
+            ORDER BY "index"
+          SQL
+
+          results = db.execute(query).map { |row| format_todo(row) }
+
+          # Add checklist items and tags
+          results.each do |todo|
+            todo[:checklist_items] = get_checklist_items(db, todo[:uuid])
+            todo[:tags] = get_tags_for_task(db, todo[:uuid])
+          end
+
+          results
+        end
       end
 
       def get_logbook(period: "7d", limit: 50)
