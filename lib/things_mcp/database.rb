@@ -11,6 +11,10 @@ module ThingsMcp
   # This class provides read-only access to the Things 3 database, enabling retrieval of todos, projects, areas, and
   # tags. It handles dynamic database path resolution and provides formatted data structures.
   class Database
+    # Things date encoding constants
+    UNITS_PER_DAY = 128.0
+    EPOCH = Date.new(-814, 4, 1)
+
     class << self
       def database_path
         @database_path ||= find_database_path
@@ -93,6 +97,8 @@ module ThingsMcp
       def get_logbook(period: "7d", limit: 50)
         days = parse_period(period)
         cutoff = Date.today - days
+        # stopDate is a REAL column with Unix timestamp
+        cutoff_timestamp = cutoff.to_time.to_i
 
         with_database do |db|
           query = <<~SQL
@@ -101,7 +107,7 @@ module ThingsMcp
             WHERE type = 0
               AND status IN (3, 2)
               AND trashed = 0
-              AND stopDate >= julianday('#{cutoff}')
+              AND stopDate >= #{cutoff_timestamp}
             ORDER BY stopDate DESC
             LIMIT #{limit}
           SQL
@@ -247,11 +253,17 @@ module ThingsMcp
 
           # Date filters
           if filters[:start_date]
-            conditions << "startDate >= julianday('#{filters[:start_date]}')"
+            # startDate is INTEGER column with NSDate seconds
+            nsdate_epoch = Time.new(2001, 1, 1, 0, 0, 0, "+00:00")
+            start_timestamp = (Date.parse(filters[:start_date]).to_time - nsdate_epoch).to_i
+            conditions << "startDate >= #{start_timestamp}"
           end
 
           if filters[:deadline]
-            conditions << "deadline <= julianday('#{filters[:deadline]}')"
+            # deadline is INTEGER column with NSDate seconds
+            nsdate_epoch = Time.new(2001, 1, 1, 0, 0, 0, "+00:00")
+            deadline_timestamp = (Date.parse(filters[:deadline]).to_time - nsdate_epoch).to_i
+            conditions << "deadline <= #{deadline_timestamp}"
           end
 
           # Tag filter
@@ -285,6 +297,8 @@ module ThingsMcp
       def get_recent(period)
         days = parse_period(period)
         cutoff = Date.today - days
+        # creationDate is a REAL column with Unix timestamp
+        cutoff_timestamp = cutoff.to_time.to_i
 
         with_database do |db|
           query = <<~SQL
@@ -292,7 +306,7 @@ module ThingsMcp
             FROM TMTask
             WHERE type = 0
               AND trashed = 0
-              AND creationDate >= julianday('#{cutoff}')
+              AND creationDate >= #{cutoff_timestamp}
             ORDER BY creationDate DESC
           SQL
 
@@ -413,10 +427,10 @@ module ThingsMcp
           area: row["area"],
           tags: [],  # Tags will be populated separately
           when: format_when(row["start"]),
-          start_date: julian_to_date(row["startDate"]),
-          deadline: julian_to_date(row["deadline"]),
-          created: julian_to_date(row["creationDate"]),
-          modified: julian_to_date(row["userModificationDate"]),
+          start_date: things_date_to_date(row["startDate"]),
+          deadline: things_date_to_date(row["deadline"]),
+          created: unix_timestamp_to_date(row["creationDate"]),
+          modified: unix_timestamp_to_date(row["userModificationDate"]),
         }
       end
 
@@ -429,10 +443,10 @@ module ThingsMcp
           area: row["area"],
           tags: [],  # Tags will be populated separately for projects too
           when: format_when(row["start"]),
-          start_date: julian_to_date(row["startDate"]),
-          deadline: julian_to_date(row["deadline"]),
-          created: julian_to_date(row["creationDate"]),
-          modified: julian_to_date(row["userModificationDate"]),
+          start_date: things_date_to_date(row["startDate"]),
+          deadline: things_date_to_date(row["deadline"]),
+          created: unix_timestamp_to_date(row["creationDate"]),
+          modified: unix_timestamp_to_date(row["userModificationDate"]),
         }
       end
 
@@ -470,11 +484,20 @@ module ThingsMcp
         end
       end
 
-      def julian_to_date(julian_days)
-        return unless julian_days
+      def things_date_to_date(value)
+        return unless value
 
-        # SQLite Julian day starts from noon on November 24, 4714 BC
-        Date.jd(julian_days.to_i + 2400001).to_s
+        # Things uses custom date encoding: 128 units = 1 day (11.25 minutes per unit)
+        # Epoch calculated from reverse engineering known date values
+        days = value / UNITS_PER_DAY
+        (EPOCH + days).to_s
+      end
+
+      def unix_timestamp_to_date(value)
+        return unless value
+
+        # REAL columns (creationDate, userModificationDate): Unix timestamps (seconds since 1970-01-01)
+        Time.at(value.to_f).to_date.to_s
       end
 
       def parse_period(period)

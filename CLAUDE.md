@@ -59,6 +59,10 @@ The server dynamically finds the Things database by searching `~/Library/Group C
 
 No test suite. Use `bin/test_connection` to verify everything works.
 
+### Code Quality
+
+Always run `bundle exec rubocop -A` after making changes to auto-fix style issues.
+
 ### Commit Style
 
 - Use lowercase for commit messages (e.g., "add foo" not "Add foo")
