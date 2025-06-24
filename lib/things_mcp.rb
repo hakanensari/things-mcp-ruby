@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 require "mcp"
-require_relative "things_mcp/server"
-require_relative "things_mcp/database"
-require_relative "things_mcp/handlers"
-require_relative "things_mcp/tools"
-require_relative "things_mcp/url_scheme"
-require_relative "things_mcp/formatters"
+require "things_mcp/server"
+require "things_mcp/database"
+require "things_mcp/handlers"
+require "things_mcp/tools"
+require "things_mcp/url_scheme"
+require "things_mcp/formatters"
 
 # ThingsMcp provides a Model Context Protocol (MCP) server for Things 3
 #

@@ -1,8 +1,9 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "bundler/setup"
-require_relative "../lib/things_mcp/server"
+lib = File.expand_path("../lib", __dir__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require "things_mcp/server"
 
 # Run the MCP server
 ThingsMcp::Server.new.run

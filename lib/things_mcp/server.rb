@@ -3,10 +3,10 @@
 require "mcp"
 require "mcp/transports/stdio"
 require "logger"
-require_relative "tools"
-require_relative "handlers"
-require_relative "database"
-require_relative "url_scheme"
+require "things_mcp/tools"
+require "things_mcp/handlers"
+require "things_mcp/database"
+require "things_mcp/url_scheme"
 
 module ThingsMcp
   # MCP server implementation for Things 3 integration

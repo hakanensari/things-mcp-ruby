@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require "json"
-require_relative "database"
-require_relative "url_scheme"
-require_relative "formatters"
+require "things_mcp/database"
+require "things_mcp/url_scheme"
+require "things_mcp/formatters"
 
 module ThingsMcp
   # Tool call handlers for MCP server

@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require "bundler/setup"
-require_relative "../lib/things_mcp"
+$LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+require "things_mcp"
 
 puts "Testing Things MCP Ruby Server"
 puts "=" * 40
