@@ -66,7 +66,31 @@ module ThingsMcp
       end
 
       def get_today
-        get_todos_by_start(1)
+        # Get todos scheduled for today or overdue (startDate <= today's value)
+        today_value = (Date.today - EPOCH) * UNITS_PER_DAY
+
+        with_database do |db|
+          query = <<~SQL
+            SELECT #{todo_columns}
+            FROM TMTask
+            WHERE type = 0
+              AND status = 0
+              AND trashed = 0
+              AND startDate IS NOT NULL
+              AND startDate <= #{today_value.to_i}
+            ORDER BY "index"
+          SQL
+
+          results = db.execute(query).map { |row| format_todo(row) }
+
+          # Add checklist items and tags
+          results.each do |todo|
+            todo[:checklist_items] = get_checklist_items(db, todo[:uuid])
+            todo[:tags] = get_tags_for_task(db, todo[:uuid])
+          end
+
+          results
+        end
       end
 
       def get_upcoming
@@ -87,7 +111,28 @@ module ThingsMcp
       end
 
       def get_anytime
-        get_todos_by_start(2).reject { |t| t[:start_date] || t[:deadline] }
+        # Get todos without specific start dates (the real "anytime" list)
+        with_database do |db|
+          query = <<~SQL
+            SELECT #{todo_columns}
+            FROM TMTask
+            WHERE type = 0
+              AND status = 0
+              AND trashed = 0
+              AND startDate IS NULL
+            ORDER BY "index"
+          SQL
+
+          results = db.execute(query).map { |row| format_todo(row) }
+
+          # Add checklist items and tags
+          results.each do |todo|
+            todo[:checklist_items] = get_checklist_items(db, todo[:uuid])
+            todo[:tags] = get_tags_for_task(db, todo[:uuid])
+          end
+
+          results
+        end
       end
 
       def get_someday
