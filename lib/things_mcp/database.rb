@@ -13,12 +13,7 @@ module ThingsMcp
   class Database
     class << self
       def database_path
-        # Clear memoization if it's an empty array
-        @database_path = nil if @database_path.is_a?(Array) && @database_path.empty?
-
-        path = @database_path ||= find_database_path
-        # Defensive programming: ensure we always return a string, not an array
-        path.is_a?(Array) ? path.first : path
+        @database_path ||= find_database_path
       end
 
       def things_app_available?
