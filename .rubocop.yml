@@ -5,8 +5,13 @@ AllCops:
   TargetRubyVersion: 3.2
   NewCops: enable
   Exclude:
-    - 'vendor/**/*'
+    - "vendor/**/*"
 
 # Allow get_ prefixed methods for database accessors that match Things 3 semantics
 Naming/AccessorMethodName:
   Enabled: false
+# This generated a false positive in ThingsMcp::Server, where :server_context parameter is required by the MCP framework
+# interface
+Lint/UnusedBlockArgument:
+  Exclude:
+    - "lib/things_mcp/server.rb"

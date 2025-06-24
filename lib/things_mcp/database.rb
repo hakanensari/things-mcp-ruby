@@ -13,7 +13,12 @@ module ThingsMcp
   class Database
     class << self
       def database_path
-        @database_path ||= find_database_path
+        # Clear memoization if it's an empty array
+        @database_path = nil if @database_path.is_a?(Array) && @database_path.empty?
+
+        path = @database_path ||= find_database_path
+        # Defensive programming: ensure we always return a string, not an array
+        path.is_a?(Array) ? path.first : path
       end
 
       def things_app_available?
@@ -303,7 +308,18 @@ module ThingsMcp
       private
 
       def find_database_path
-        group_containers_dir = "#{Dir.home}/Library/Group Containers"
+        # Use actual user's home directory, not the process owner's
+        actual_home = ENV["HOME"] || Dir.home
+        # If running as root, try to find the real user's home directory
+        if actual_home == "/var/root" && ENV["SUDO_USER"]
+          actual_home = "/Users/#{ENV["SUDO_USER"]}"
+        elsif actual_home == "/var/root"
+          # Fallback: look for the most recent user directory
+          user_dirs = Dir.glob("/Users/*").select { |d| File.directory?(d) && !File.basename(d).start_with?(".") }
+          actual_home = user_dirs.max_by { |d| File.mtime(d) } if user_dirs.any?
+        end
+
+        group_containers_dir = "#{actual_home}/Library/Group Containers"
 
         # Find Things-specific directories to avoid permission issues
         things_dirs = Dir.glob("#{group_containers_dir}/*").select do |dir|
@@ -311,11 +327,24 @@ module ThingsMcp
         end
 
         things_dirs.each do |things_dir|
-          pattern = "#{things_dir}/*/*/main.sqlite"
-          matches = Dir.glob(pattern)
+          # First try to find the current database (not in Backups folder)
+          current_pattern = "#{things_dir}/*/Things Database.thingsdatabase/main.sqlite"
+          current_matches = Dir.glob(current_pattern).reject { |path| path.include?("/Backups/") }
 
-          return matches.first unless matches.empty?
+          unless current_matches.empty?
+            return current_matches.first
+          end
+
+          # Fallback: look for any main.sqlite but exclude backups
+          fallback_pattern = "#{things_dir}/*/*/main.sqlite"
+          fallback_matches = Dir.glob(fallback_pattern).reject { |path| path.include?("/Backups/") }
+
+          unless fallback_matches.empty?
+            return fallback_matches.first
+          end
         end
+
+        nil
       end
 
       def todo_columns

@@ -95,7 +95,7 @@ module ThingsMcp
           required: tool_def[:inputSchema][:required],
         )
 
-        define_singleton_method(:call) do |_server_context:, **arguments|
+        define_singleton_method(:call) do |server_context:, **arguments|
           # Convert symbol keys to string keys for consistent access
           string_arguments = arguments.transform_keys(&:to_s)
           result = ThingsMcp::Handlers.handle_tool_call(name, string_arguments)
@@ -107,12 +107,15 @@ module ThingsMcp
             },
           ])
         rescue => e
-          MCP::Tool::Response.new([
-            {
-              type: "text",
-              text: "Error: #{e.message}",
-            },
-          ])
+          # Log the full error to stderr for debugging
+          $stderr.puts "ERROR in tool #{name}: #{e.class}: #{e.message}"
+          $stderr.puts "Arguments: #{string_arguments.inspect}"
+          $stderr.puts "Backtrace:"
+          e.backtrace.each { |line| $stderr.puts "  #{line}" }
+          $stderr.flush
+
+          # Also raise the error so MCP can handle it properly
+          raise e
         end
       end
     end
